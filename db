@@ -1,0 +1,1430 @@
+#!/usr/bin/ksh 
+
+if [  -f  "$1" ]; then
+arr=( $(awk -F ' ' '{for ( i=1 ; i<=NF; i++)
+print $i}' "$1") )
+fi
+s1=${arr[0]}
+s2=${arr[1]}
+s3=${arr[2]}     
+function typecheck 
+{
+if [ "$2" == "" ]
+then 
+echo -e "${YELLOW} Empty Value  ${NORM}"
+else
+case $1 in 
+	int)  
+		
+		if echo $* | egrep -q '*([0-9])'; then
+    		
+			 echo -e "${LGREEN} $2 is a number ${NORM}"
+                        
+
+
+		
+		else
+		{
+   		echo -e "${LRED} SyntaxError : $2 is not a number ${NORM}"
+		flg=0 
+		
+		}
+		fi
+	;;
+
+chars)  
+shift
+
+		
+		if echo $* | egrep -q '^([a-z]|[A-Z]|\s)+$'; then
+    		
+			 echo -e "${LGREEN} $* is a chars ${NORM}"
+                        
+
+
+		
+		else
+		{
+   		echo -e "${LRED}  SyntaxError : $* is not a characters${NORM}"
+		flg=0 
+		
+		}
+		fi
+	;;
+
+
+
+mixed)  
+		
+		if echo $* | egrep -q '^([a-z]|[A-Z]|[0-9])+([a-z]|[A-Z]|[0-9]|\s)+$'; then
+    		
+			  echo -e "${LGREEN} $* is a mixed ${NORM}"
+                        
+
+
+		
+		else
+		{
+   		echo -e "${LRED} SyntaxError : $* is not mixed ${NORM}"
+		flg=0 
+		
+		}
+		fi
+	;;
+
+
+
+
+
+	*) echo -e "${RED} $1 Unknown Type ${NORM}"
+	;;
+
+
+esac
+fi
+} 
+case $s1 in 
+create) 
+   case $s2 in		
+	database)
+dbname=$s3
+if [  -d  "$dbname/" ]; then
+if [ "$dbname" == "" ]
+then
+echo nename
+else
+		
+   echo -e "${RED} database $s3 Already Exist Just use -select database database_name ${NORM}" 
+dbname=""
+fi
+else 
+mkdir $s3
+       echo -e "${GREEN} $s3  created sucessfully use-\" select database $s3 \" to can add tables ${NORM}"
+echo $dbname >> $loggeduser
+echo $dbname >> root
+tbname=""
+fi
+
+        ;;
+	
+
+
+	table)
+
+tbname=$s3
+if [ -n "$dbname" ];then
+cd $dbname
+if [  -f  "$tbname" ]; then
+
+   	echo -e "${RED}table  $s3 Already Exist Just use -select table  table_name ${NORM}"
+
+else 
+
+
+if [ "$s3" == "" ]
+then 
+echo -e "${LRED} Syntax Error- Just Insert Table Name To Be Created ${NORM}"
+else
+
+	touch $s3 
+        touch $s3+metadata
+         echo -e "${GREEN} $s3 table $s3  created sucessfully use- \"select table  $s3 \" to can add columns ${NORM}"
+	
+
+fi 
+
+	
+#fi
+fi
+
+	cd ..
+else 
+
+echo -e "${LRED} -select database first ${NORM}"
+fi
+        ;;
+	
+
+
+	user)
+	if [ "$loggeduser" == "root" ]
+	then 
+		if [  -f  "$s3" ];
+		 then
+		echo -e "${RED} This User Already Exist ${NORM}" 
+		else
+		newuser=$s3
+		touch $newuser     
+		echo -e "${BLUE}${BOLD} Insert New User 's Password: ${NORM}" 
+		read userpassword
+		echo $userpassword >> $newuser
+		echo $newuser >> users
+        	echo -e "${GREEN} user created sucessfully You Can Login Using It Now ${NORM}" 
+		fi
+	else
+	echo -e "${RED}${UNDERLINE} You Have No Permission To Ceate New User - Root Only ${NORM}"         
+	fi
+	;;
+	*)echo -e "${LRED} Syntax Error use- create database-table-user objectname  ${NORM}" 
+	;;
+
+	
+
+
+   esac
+;;
+
+select)
+   case $s2 in
+   database)dbname=$s3
+if [  -d  "$dbname/" ]; then
+
+
+resu=$( grep -wc $dbname "$loggeduser" )
+if [ $resu -gt 0 ];
+then
+	
+      echo -e "${GREEN} database $s3 selected successfully ${NORM}" 
+	tbname=""
+
+
+
+echo -e "${CYAN} List Of Permitted Access Tables ${NORM}" 
+	if [  "$dbname" != "" ];then
+	cd $dbname
+	ls  > ../tablelist
+	cd ..
+	
+
+	while read line
+	do
+	
+ 
+	resu=$( echo $line | grep -wc "metadata"  )
+	if [ $resu -gt 0 ];
+	then
+	continue
+	else
+	echo -e "${WHILE}${CYANB} $line ${NORM}"
+	fi
+	done < tablelist
+	rm tablelist
+	fi
+
+
+
+
+
+else 
+dbname=""
+echo -e "${RED}${UNDERLINE} You Have NO Permission To Access Database $s3  ${NORM}"
+fi
+
+
+    
+else 
+dbname=""
+echo -e "${LRED} database $s3 Not Exist Use -\" create database $s3 \" ${NORM}"
+fi
+
+
+
+   
+   ;;
+   
+   
+   table)tbname=$s3
+
+
+if [ -n "$dbname" ];then
+cd $dbname
+
+if [  -f  "$tbname" ]; then
+	
+   echo -e "${GREEN} table  $s3 selected  ${NORM}"
+else 
+
+	tbname="" 
+        
+        echo -e "${LRED} table $s3  Not exist  ${NORM}"
+fi
+
+	cd ..
+else 
+
+echo -e "${LRED} -select database first ${NORM}"
+fi
+ 
+   ;;
+   
+   all)
+s4=${arr[3]}
+s5=${arr[4]}
+s6=${arr[5]}
+s7=${arr[6]}
+s8=${arr[7]}         
+	case $s3 in 
+   	from)tbname=$s4
+	cd $dbname
+
+if [[ "$s5" == "where" ]];
+then
+       colcheck=$s6
+       colvalcheck=$s8 
+
+colarray=( $(awk -F ' ' '{ print $1 }' "$tbname+metadata") )
+	#echo "${colarray[*]}"
+while read line
+do
+echo $line>temp 
+
+
+resu=$( grep -wc $colvalcheck temp )
+if [ $resu -eq 1 ];
+then
+	echo -e "${CYAN} $line ${NORM}"
+       
+fi
+
+
+#if [[ $resu -eq 1 ]]
+#then 
+#echo exist
+ 
+
+
+#awk -F: '{ print $s1 }' $tbname+metadata 
+#array2=( $(awk -F:'{ print $s2 }' "$temp") )
+
+##if[${array[0]} == $colvalcheck]
+	#echo arratres
+done <"$tbname"
+
+
+else
+colarray=( $(awk -F ' ' '{ print $1 }' "$tbname+metadata") )
+	#echo "${colarray[*]}"
+while read line
+do
+echo -e "${CYAN} $line ${NORM}"
+
+done <"$tbname"
+
+fi
+      cd ..
+ 	  ;;
+	*) echo -e "${LRED} Syntax Error use-select all form tablename where col1 = valx ${NORM}"
+	;; 
+esac
+   echo -e "${LGREEN}  Items  selected successfully ${NORM}"
+   ;;
+
+    *)echo -e "${LRED} Syntax Error Use-select database-table-all objectname ${NORM}"
+    ;;
+
+
+   esac
+;;
+
+
+
+addcolumn)
+if [ $dbname == ""  ];then
+echo "select database first"
+else
+if [ $tbname == ""  ];then
+echo "select table firstcccc" 
+else
+
+cd $dbname     
+NUMOFROWS=$(wc -l < "$tbname")
+echo 
+if [ $NUMOFROWS -gt 0 ]
+	then
+touch moddata
+while read line
+do 
+
+echo "$line :" >> moddata
+done < "$tbname"
+
+rm $tbname
+cp moddata "$tbname" 
+
+
+
+fi
+
+resu=$( grep -wc $s2  "$tbname+metadata" )
+if [ "$resu" == "0" ];
+then
+echo $s2 : $s3 >>$tbname+metadata
+echo Column Added To $tbname  Successfully 	
+else 
+echo Logical Error-Column Name Already Exist $s2 
+fi
+cd ..
+
+fi
+fi
+   ;;
+
+
+
+
+
+
+
+changecolumn)
+
+if [ "$dbname" == "" ];then
+echo "select database first"
+else
+if [ "$tbname" == "" ];then
+echo "select table first" 
+else
+
+
+cd $dbname 
+touch temp2
+touch  fieldstemp 
+touch newtable
+flag=1  
+#grep -wc 'name' table1+metadata4
+columnname=$s2
+s4=${arr[3]} 
+s5=${arr[4]}
+while read line
+do 
+echo $line >temp
+
+
+resu=$( grep -wc $columnname temp )
+if [ $resu -eq 1 ];
+then
+echo "$columnname : $s3" >>temp2
+flag=0
+fi
+if [ $flag -eq 1 ]
+then 
+echo $line >>temp2
+fi
+flag=1;
+
+
+done <"$tbname+metadata"
+
+
+rm "$tbname+metadata"
+cp temp2 "$tbname+metadata"  
+rm temp2 temp
+
+
+
+
+COLNUMBER=0
+COUNTER=1
+FIELDCOUNTER=1
+NEWROW=""
+flg=1
+newtype=$s3
+if [ "$s4" == "default" ]
+then 
+defvalue=$s5
+else
+defvalue="NULL"
+fi
+#step1 
+while read line
+do 
+
+resu=$( echo $line | grep -wc $columnname  )
+if [ $resu -eq 1 ];
+then
+	COLNUMBER=$COUNTER
+fi
+
+
+
+COUNTER=$(( $COUNTER + 1 ))
+done < "$tbname+metadata"
+
+echo -e "${LBLUE} List Of Affected Rows   ${NORM}"
+while read line
+do 
+echo $line | awk 'BEGIN{ FS=":" } ; { for ( i=1 ; i<=NF; i++) print $i  }' > fieldstemp	
+
+
+	while read field
+	do 
+	if [ $FIELDCOUNTER -eq $COLNUMBER ] 
+	then
+
+	typecheck  $newtype $field
+
+		if [ $flg == 0 ]
+		then 
+
+			if [ $FIELDCOUNTER -eq 1 ] 
+			then
+			NEWROW=$defvalue
+			else
+			NEWROW=$NEWROW":"$defvalue
+			fi
+			updateflg=1
+
+		else
+		updateflg=0
+		fi
+
+		
+	else
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+		NEWROW=$field
+		else
+		NEWROW=$NEWROW":"$field
+		fi
+	
+		
+	fi
+ 	#iftype not matched
+
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+
+
+
+
+
+
+if [ $updateflg == 1 ]
+then 
+echo -e "${CYAN} $NEWROW ${NORM}"
+echo $NEWROW >> newtable
+else
+echo $line >> newtable
+fi
+
+FIELDCOUNTER=1
+NEWROW=""
+done < "$tbname"
+rm $tbname
+cp newtable $tbname
+rm fieldstemp 
+rm newtable
+cd ..
+fi
+fi
+   ;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+deleterow)
+
+if [ "$dbname" == "" ];then
+echo "select database first"
+else
+if [ "$tbname" == "" ];then
+echo "select table first" 
+else
+
+
+cd $dbname 
+touch newtable
+touch fieldstemp
+flag=1  
+columnname=$s3
+s4=${arr[3]} 
+s5=${arr[4]}
+COLNUMBER=0
+COUNTER=1
+FIELDCOUNTER=1
+NEWROW=""
+flg=1
+comvalue=$s5
+deleteflag=0
+#step1 
+while read line
+do 
+
+resu=$( echo $line | grep -wc $columnname  )
+if [ $resu -eq 1 ];
+then
+	COLNUMBER=$COUNTER
+fi
+
+
+
+COUNTER=$(( $COUNTER + 1 ))
+done < "$tbname+metadata"
+
+echo -e "${LBLUE} List Of Deleted Rows   ${NORM}"
+while read line
+do 
+
+echo $line | awk 'BEGIN{ FS=":" } ; { for ( i=1 ; i<=NF; i++) print $i  }' > fieldstemp	
+#cat fieldstamp
+
+	while read field
+	do 
+	if [ $FIELDCOUNTER -eq $COLNUMBER ] 
+	then
+
+		if [ "$field" == "$comvalue" ] 
+		then
+
+
+		deleteflag=1
+		fi	
+	
+	fi
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+
+
+
+
+
+
+if [ $deleteflag == 1 ]
+then 
+echo -e "${CYAN} $line ${NORM}"
+else
+echo $line >> newtable
+fi
+deleteflag=0
+FIELDCOUNTER=1
+NEWROW=""
+done < "$tbname"
+rm $tbname
+cp newtable $tbname
+rm fieldstemp 
+rm newtable
+cd ..
+fi
+fi
+   ;;
+
+
+
+
+
+
+insert)
+echo insert way
+if [  -f  "$s2" ]; then
+echo dfrgrgf
+else
+echo system error 
+fi
+;;
+
+
+
+set)
+case $s2 in 
+	values)	
+if [ $dbname == "" ];then
+echo "select database first"
+else
+if [ $tbname == "" ];then
+echo "select table first" 
+else
+
+
+
+awk 'BEGIN{ FS="\"";j=0 } ; { for ( i=1 ; i<=NF; i++) if(j!=0) {print $i ;} else {j++;} }'  "$1" >awkfile 
+awk 'BEGIN{ FS="," } ; { for ( i=1 ; i<=NF; i++) print $i  }' "awkfile" >awkfile2
+
+
+#awk 'BEGIN{ FS="," } ; { for ( i=1 ; i<=NF; i++) print $i }'  "$1" >awkfile 
+i=0
+while read line
+do
+
+arr2[i]=$line
+i=$(( $i + 1 ))
+done <awkfile2
+#dbname="database1"
+#tbname="table1" 
+cd $dbname
+
+NUMOFTYPES=$(wc -l < "$tbname+metadata")
+echo 
+if [ $NUMOFTYPES -gt 0 ]
+	then
+
+flg=1  
+output=""
+array=( $(awk -F ' ' '{ print $3 }' "$tbname+metadata") )
+j=0
+
+cd ..
+while read line
+do
+typecheck  ${array[j]} $line
+
+if [ $j -eq 0 ]
+then
+output="$line"
+else
+output=$output":"$line
+fi
+j=$(( $j + 1 ))
+done <awkfile2
+
+
+
+
+
+#for i in ${array[@]}; do
+#typecheck  ${array[j]} ${arr2[j]}
+#if [ $j -eq 0 ]
+#then
+#output="${arr2[j]}"
+#else
+#output=$output":"${arr2[j]}
+#fi
+#j=$(( $j + 1 ))
+#done
+
+
+
+
+cd $dbname
+
+
+if [ $flg -eq 1 ];
+then
+       echo $output>>$tbname 
+
+fi
+
+cd ..
+rm awkfile
+rm awkfile2
+else
+cd ..
+echo -e "${Lred} THERE Is No Any DATA Tyeps Inserted to this table ${NORM} "
+fi 
+#check type in serted 	
+
+fi
+fi
+;;
+
+
+
+
+
+	*) echo Syntax Error Found use-set values val1 val2 .....numberofcolumns
+	;;  
+
+esac
+;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+show)
+case $s2 in 
+	databases)
+
+echo -e "${CYAN} List Of Permitted Access Data Bases For - $username ${NORM}"
+flag101=0
+while read line
+do 
+if [ $flag101 -gt 0 ]
+	then
+
+					if [ -d "$line/" ]
+						then
+					           echo -e "${WHILE}${CYANB} $line ${NORM}"
+						fi
+
+
+
+fi 
+flag101=$(( $flag101 +1 ))
+done <"$username"
+	
+	#awk '{ if( NR > 1 ) print $1 }' "$loggeduser"
+	;;
+
+
+
+
+
+
+tables)
+	echo "List Of Permitted Access Tables"
+	if [  "$dbname" != "" ];then
+	cd $dbname
+	ls  > ../tablelist
+	cd ..
+	
+
+	while read line
+	do
+	
+ 
+	resu=$( echo $line | grep -wc "metadata"  )
+	if [ $resu -gt 0 ];
+	then
+	continue
+	else
+	echo $line
+	fi
+	done < tablelist
+	rm tablelist
+	fi
+
+
+		
+	;;
+
+
+esac
+;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+delete)
+case $s2 in 
+	database)
+if [ -n "$loggeduser" ]
+then
+	if [  -d  "$s3/" ]; then	
+		resu=$( grep -wc $s3 "$loggeduser" )
+		
+		if [ $resu -gt 0 ];
+		then
+			rm -r $s3
+        		echo database $s3 deleted  successfully 
+			if [ "$s3" == "$dbname" ]
+			then
+			dbname=""
+			tbname=""
+			fi  
+		else 
+
+			echo You Have NO Permission To Delete Database $s3  
+		fi
+		
+	else
+	echo "Database Not Exist "
+	fi	
+else
+echo "You Have To Login first:"
+fi	
+	;;
+
+
+
+
+table)
+#tbname=$s3
+if [ -n "$dbname" ];then
+cd $dbname
+if [  -f  "$s3" ]; then
+
+   	rm $s3 "$s3+metadata"
+	echo -e "${GREEN} Tale $s3 Deleted Successfully  ${NORM}"
+
+else 
+if [ "$s3" == "" ]
+then 
+echo Syntax Error- Just Insert Table Name To Be Deleted 
+else
+echo -e "${LRED}  "Table Not Exist" ${NORM}"
+fi 
+
+	
+#fi
+fi
+
+	cd ..
+else 
+
+echo -e "${LRED} -select database first ${NORM}"
+fi
+        ;;
+	
+
+
+*)
+echo -e "${LRED} Syntax Error Check Help ${NORM}"
+;;
+
+esac
+;;
+
+
+
+
+logout)
+loggeduser=""
+dbname=""
+tbname=""
+echo -e "${LRED} You Have Logged Out -login to return -exit -to getout  ${NORM}" 
+;;
+
+login)
+NUMOFLINES=$(wc -l < "users")
+loginflag=1
+while [ $loginflag -eq 1 ]
+do
+if [ $NUMOFLINES -eq 0 ]
+	then
+	touch root 
+	echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+	echo -e "${LBLUE} Insert Root Password: ${NORM}"
+	read password
+	echo $password > root
+	echo root >> "users"
+	clear
+        echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+	echo -e "${GREEN} You Are Now Logged As Root${NORM}" 
+	echo -e "${BLUE}${GRAYB}${UNDERLINE} For More Info Just Say- \"help\"   ${NORM}"  
+	loginflag=0
+
+else
+	echo -e "${LBLUE} Wellcome Insert User Name: ${NORM}"
+	read username
+	echo -e "${LBLUE} Insert Your Password: ${NORM}"
+	read password
+     if [  -f  "$username" ]; then
+		read line <"$username"
+		if [ $line == $password ]
+		then
+		clear
+                echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+		echo -e "${GREEN} Login Successfully Done :) using \" $username \" ${NORM}"  
+		echo "show databases" > wellcome
+		. db wellcome
+		loginflag=0
+		loggeduser=$username
+		else
+		echo -e "${RED}${UNDERLINE} Login Failed :( ${NORM}" 
+		fi 
+     fi
+
+fi
+done
+;;
+
+
+
+
+
+
+
+
+deletecolumn)
+
+#store number if delete column 
+#mahmoud:55:engineer
+colname=$s2
+COLNUMBER=0
+COUNTER=1
+FIELDCOUNTER=1
+NEWROW=""
+equalityflag=0
+cd $dbname
+touch metatemp 
+while read line
+do 
+resu=$( echo $line | grep -wc $colname  )
+if [ $resu -eq 1 ];
+then
+	COLNUMBER=$COUNTER
+else
+echo $line >> metatemp
+fi
+
+COUNTER=$(( $COUNTER + 1 ))
+done < "$tbname+metadata"
+
+rm "$tbname+metadata"
+cp metatemp "$tbname+metadata"  
+rm metatemp 
+
+while read line
+do 
+echo $line | awk 'BEGIN{ FS=":" } ; { for ( i=1 ; i<=NF; i++) print $i  }' > fieldstemp
+fieldstempLN=$(wc -l < "fieldstemp")
+	while read field
+	do 
+	
+
+		#if [ $FIELDCOUNTER -eq $fieldstempLN ] 
+		#then
+		#fi
+
+
+
+	if [ $FIELDCOUNTER -eq  $COLNUMBER ] 
+		then
+		equalityflag=1
+		
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+		
+		NEWROW=""
+		else
+		
+		NEWROW=$NEWROW""
+		fi
+		
+	else
+		
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+			#compare=$(( $fieldstempLN-1 ))
+			#	if [ $FIELDCOUNTER -eq  $compare  ] 
+			#	then
+				
+				NEWROW=$field""
+			#	fi
+		
+		else
+			
+			if [ $FIELDCOUNTER -eq $fieldstempLN ] 
+			then
+			
+			NEWROW=$NEWROW":"$field""
+			else
+				
+				compare=$(( $fieldstempLN-1 ))
+				if [ $FIELDCOUNTER -eq  $compare  ] 
+				then
+					
+					if [ $equalityflag -eq 0 ] 
+					then
+					
+					NEWROW=$NEWROW""$field""
+					else 
+					NEWROW=$NEWROW""$field":"
+					fi
+				else
+						
+				NEWROW=$NEWROW""$field":"
+				fi
+
+
+			
+			fi
+		
+		fi
+	
+		
+	fi
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+equalityflag=0
+echo $NEWROW >> newtable
+
+FIELDCOUNTER=1
+#echo "eeeee${arr[0]} eeeeeee ${arr[1]} eeeeee${arr[2]}"
+#echo $line
+
+done < "$tbname"
+
+rm "$tbname"
+cp newtable "$tbname"  
+rm newtable fieldstemp
+
+
+
+
+
+
+
+cd ..
+   ;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+updatecolumn)
+s4=${arr[3]}
+s5=${arr[4]}
+s6=${arr[5]}
+s7=${arr[6]}
+s8=${arr[7]}
+s9=${arr[8]}
+awk 'BEGIN{ FS="\"";j=0 } ; { for ( i=1 ; i<=NF; i++) if(j!=0) {print $i ;} else {j++;} }'  "$1" > values
+#read line <"$username"
+count=1
+while read value
+do
+if [ $count -eq 1 ] 
+then
+newvalue=$value
+fi
+
+if [ $count -eq 3 ] 
+then
+oldvalue=$value
+fi
+
+count=$(( $count + 1))
+done < values
+updatedcol=$s3
+
+
+comparedcol=$s7
+
+
+#colname=$s2
+COLNUMBER=0
+COMCOLNUMBER=0
+COUNTER=1
+updateflag=0
+FIELDCOUNTER=1
+NEWROW=""
+cd $dbname
+touch metatemp 
+echo -e "${LBLUE} List Of Updated Rows   ${NORM}"
+while read line
+do 
+
+
+resu=$( echo $line | grep -wc $updatedcol  )
+if [ $resu -eq 1 ];
+then
+	COLNUMBER=$COUNTER
+fi
+resu=0
+resu=$( echo $line | grep -wc $comparedcol  )
+if [ $resu -eq 1 ];
+then
+	COMCOLNUMBER=$COUNTER
+fi
+
+
+COUNTER=$(( $COUNTER + 1 ))
+done < "$tbname+metadata"
+
+
+while read line
+do 
+
+resu=$( echo $line | grep -wc $oldvalue  )
+if [ $resu -gt 0 ];
+then
+echo $line | awk 'BEGIN{ FS=":" } ; { for ( i=1 ; i<=NF; i++) print $i  }' > fieldstemp
+
+	while read field
+	do 
+
+	if [ $FIELDCOUNTER -eq $COMCOLNUMBER ] 
+	then
+		if [ "$field" == "$oldvalue" ]
+		then
+		updateflag=1
+		fi
+	fi
+
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+
+	FIELDCOUNTER=1
+if [ $updateflag -eq 1 ]
+then
+
+
+	while read field
+	do 	
+
+	if [ $FIELDCOUNTER -eq $COLNUMBER ] 
+	then
+	
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+		NEWROW=$newvalue
+		else
+		NEWROW=$NEWROW":"$newvalue
+		fi
+
+		
+	else
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+		NEWROW=$field
+		else
+		NEWROW=$NEWROW":"$field
+		fi
+	
+		
+	fi
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+echo -e "${CYAN} $NEWROW ${NORM}"
+echo $NEWROW >> newtable
+else
+echo $line >> newtable
+fi #flagupdate
+FIELDCOUNTER=1
+#echo "eeeee${arr[0]} eeeeeee ${arr[1]} eeeeee${arr[2]}"
+#echo $line
+else
+echo $line >> newtable
+fi #wherecheck
+done < "$tbname"
+rm "$tbname"
+cp newtable "$tbname"  
+rm newtable fieldstemp
+
+
+
+
+
+
+
+cd ..
+   ;;
+
+
+
+
+
+
+
+changeecolumn)
+
+#colname=$s2
+COLNUMBER=0
+COUNTER=1
+FIELDCOUNTER=1
+NEWROW=""
+defvalue="NULL"
+cd $dbname
+
+#step1
+touch metatemp 
+while read line
+do 
+
+resu=$( echo $line | grep -wc $updatedcol  )
+if [ $resu -eq 1 ];
+then
+	COLNUMBER=$COUNTER
+fi
+
+
+
+COUNTER=$(( $COUNTER + 1 ))
+done < "$tbname+metadata"
+
+
+while read line
+do 
+echo $line | awk 'BEGIN{ FS=":" } ; { for ( i=1 ; i<=NF; i++) print $i  }' > fieldstemp	
+
+
+	while read field
+	do 
+	if [ $FIELDCOUNTER -eq $COLNUMBER ] 
+	then
+
+	typecheck  $newtype $field
+		if [ $flg == 0 ]
+		then 
+			if [ $FIELDCOUNTER -eq 1 ] 
+			then
+			NEWROW=$defvalue
+			else
+			NEWROW=$NEWROW":"$defvalue
+			fi
+			updateflg=1
+		else
+		updateflg=0
+		fi
+
+		
+	else
+		if [ $FIELDCOUNTER -eq 1 ] 
+		then
+		NEWROW=$field
+		else
+		NEWROW=$NEWROW":"$field
+		fi
+	
+		
+	fi
+ 	#iftype not matched
+
+	FIELDCOUNTER=$(( $FIELDCOUNTER + 1 ))
+	done < fieldstemp
+
+
+
+
+
+
+if [ $updateflg==1 ]
+then 
+echo $NEWROW >> newtable
+else
+echo $line >> newtable
+fi
+
+FIELDCOUNTER=1
+
+done < "$tbname"
+
+
+rm "$tbname"
+cp newtable "$tbname"  
+rm newtable fieldstemp
+
+
+
+
+
+
+
+cd ..
+   ;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+clear)
+clear
+echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}" 
+;;
+
+
+
+pwd)
+pwd
+;;
+
+reset)
+cd $DEFAULTPATH 
+;;
+
+help)
+clear
+	
+	
+echo -e "${BLACk}${BOLD} Wellcome IN Help ${NORM}"
+echo -e "${BLACk}${BOLD} This is ALl Available Statment With Corrrect Syntax ${NORM}"
+echo -e "${CYAN}${BOLD} create user islamaskar ${NORM}"
+echo -e "${CYAN}${BOLD} create database iti ${NORM}"
+echo -e "${CYAN}${BOLD} show databases  ${NORM}"
+echo -e "${CYAN}${BOLD} assign iti islamaskar ${NORM}"
+echo -e "${CYAN}${BOLD} create table employee ${NORM}"
+echo -e "${CYAN}${BOLD} show tables ${NORM}"
+echo -e "${CYAN}${BOLD} addcolumn name chars ${NORM}"
+echo -e "${CYAN}${BOLD} set values \"sayed,27,instructor\"  ${NORM}"
+echo -e "${CYAN}${BOLD}  select all from employee ${NORM}"
+echo -e "${CYAN}${BOLD} select all from employee where name = mohamed  ${NORM}"
+echo -e "${CYAN}${BOLD}  updatecolumn set age = "30" where name = "sayed" ${NORM}"
+echo -e "${CYAN}${BOLD}  deleterow where name = adbelrahman ${NORM}"
+echo -e "${CYAN}${BOLD}  deletecolumn jop ${NORM}"
+echo -e "${CYAN}${BOLD}  changecolumn name int default 144 ${NORM}"
+echo -e "${CYAN}${BOLD}  delete table emplyee ${NORM}"
+echo -e "${CYAN}${BOLD}  delete database iti ${NORM}"
+echo -e "${CYAN}${BOLD} logout ${NORM}"
+echo -e "${CYAN}${BOLD} login ${NORM}"
+echo -e "${CYAN}${BOLD} reset  ${NORM}"
+echo -e "${CYAN}${BOLD}  pwd ${NORM}"
+echo -e "${CYAN}${BOLD}  clear ${NORM}"
+echo -e "${CYAN}${BOLD}  ${NORM}"
+
+;;
+assign)
+db=$s2
+user=$s3
+echo $db >> "$user"
+echo -e "${CYAN}${BOLD} Assigning Done $user Now Can access $db ${NORM}"
+
+;;
+*)echo -e "${LRED} Not Valid Just Say -\"help\" ${NORM}"
+;;
+esac 
+
+
+
+ 

@@ -1,0 +1,87 @@
+#!/usr/bin/ksh
+. fonts 
+DEFAULTPATH="/home/mahmoud/Documents/tasleenengislam/bashproject"
+#echo -e "${RED}${UNDERLINE}This is a test!${NORM}"
+
+NUMOFLINES=$(wc -l < "users")
+loginflag=1
+while [ $loginflag -eq 1 ]
+do
+NUMOFLINES=$(wc -l < "users")
+if [ $NUMOFLINES -eq 0 ]
+	then
+	touch root 
+	echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+	echo -e "${LBLUE} Insert Root Password: ${NORM}"
+	read password
+	echo $password > root
+	echo root >> "users"
+	clear
+        echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+	echo -e "${GREEN} You Are Now Logged As Root${NORM}" 
+	echo -e "${BLUE}${GRAYB}${UNDERLINE} For More Info Just Say- \"help\"   ${NORM}"  
+	loginflag=0
+else
+	echo -e "${LBLUE} Wellcome Insert User Name: ${NORM}"
+	read username
+	echo -e "${LBLUE} Insert Your Password: ${NORM}"
+	read password
+     if [  -f  "$username" ]; then
+		read line <"$username"
+		if [ $line == $password ]
+		then
+		clear
+                echo -e "${WHILE}${BLUEB}${BLOD} Wellcome For DataBase System Installation ${NORM}"
+		echo -e "${GREEN} Login Successfully Done :) using \" $username \" ${NORM}"  
+		echo "show databases" > wellcome
+		. db wellcome
+		loginflag=0
+		loggeduser=$username
+		else
+		echo -e "${RED}${UNDERLINE} Login Failed :( ${NORM}" 
+		fi 
+     fi
+fi
+
+
+
+
+
+
+
+if [ $loginflag -eq 0 ]
+then
+while read line
+do
+echo $line > sqltemp
+
+#if ["$line" == "reset"];
+#then
+#cd $DEFAULTPATH
+#else
+. db sqltemp
+#fi 
+ 
+done <sqlstatment
+flago=1
+while [ "$flago"=="1" ]
+do
+echo -e "${LBLUE} $loggeduser@SQLSystem-$dbname-$tbname-> ${NORM}" 
+read input
+echo $input > sqltemp
+#if [ $input=="" ]
+#then
+#flago=0
+#echo fghfghfg
+#continue 
+#fi
+. db sqltemp
+done
+rm sqltemp
+fi
+
+
+done
+
+
+
