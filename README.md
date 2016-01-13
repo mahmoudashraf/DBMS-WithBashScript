@@ -2,7 +2,7 @@
 it is Database management system built with bash script to perform the basic DDL DML For Database 
 
 1-Instalation starts with ". start " 
-command to run the start file with will start the system 
+command to run the start file which will start the system 
 
 you can watch this video to know how to us it 
 
